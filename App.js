@@ -9,18 +9,11 @@
 
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View, Dimensions, Button} from 'react-native';
-import {gyroscope, accelerometer} from 'react-native-sensors'
-import { setUpdateIntervalForType, SensorTypes } from "react-native-sensors";
+import { setUpdateIntervalForType, SensorTypes, gyroscope, accelerometer } from 'react-native-sensors'
 
-// const instructions = Platform.select({
-//   ios: 'Press Cmd+R to reload,\n' + 'Cmd+D or shake for dev menu',
-//   android:
-//   'Double tap R on your keyboard to reload,\n' +
-//   'Shake or press menu button for dev menu',
-// });
+setUpdateIntervalForType(SensorTypes.gyroscope, 200);
+setUpdateIntervalForType(SensorTypes.accelerometer, 200);
 
-setUpdateIntervalForType(SensorTypes.gyroscope, 300);
-setUpdateIntervalForType(SensorTypes.accelerometer, 300);
 
 export default class App extends Component {
   
@@ -31,24 +24,37 @@ export default class App extends Component {
     xAccelero: 0,
     yAccelero: 0,
     zAccelero: 0,
-    timestamp: ""
+    timestamp: "",
+    counter: 0,
+    arnold: 0,
   }
   
   componentDidMount(){
-    gyroscope.subscribe(({ x, y, z, timestamp }) =>
-    this.setState({ x: x.toFixed(5), y: y.toFixed(5) , z: z.toFixed(5), timestamp })
-    );
-    accelerometer.subscribe(({ x, y, z, timestamp }) =>
-    this.setState({ xAccelero: x.toFixed(5), yAccelero: y.toFixed(5) , zAccelero: z.toFixed(5) })
-    );
+    // gyroscope.subscribe(({ x, y, z }) =>
+    //   this.setState({ x, y ,z })
+    // );
+    accelerometer.subscribe(({ x, y, z, timestamp }) => {
+      let yAcc = Math.pow(y * Math.cos(Math.atan(z/y)), 2)
+      let zAcc = Math.pow(z * Math.sin(Math.atan(z/y)), 2)
+      if(Math.sqrt(yAcc + zAcc) >= 12){
+        this.haloha(yAcc, zAcc)
+      }
+      this.setState(state => ({ xAccelero: x, yAccelero: y , zAccelero: z, initialDegree: Math.atan(z/y) })); 
+    })
   }
-  
-  
-  
+
+  haloha = (yAcc, zAcc) => {
+    this.setState({
+      arnold: this.state.arnold + 1
+    }, () => {
+      console.log(this.state.arnold)
+    })
+  }
+ 
   render() {
 
     let {height, width} = Dimensions.get('window')
-    
+
     return (
       <View style={styles.container}>
         <Text style={{fontSize: 30}}>{this.state.height} ini Height</Text>
@@ -57,20 +63,24 @@ export default class App extends Component {
         <Button 
           title="huehue"
           onPress={() => this.setState({height, width})}
-        /> 
+          /> 
+        
+        <Text style={{fontSize: 30}}>{this.state.initialDegree} ini initial degree</Text>
+{/* 
+        <Text style={{fontSize: 30}}>{this.state.x.toFixed(5)} ini X</Text>
+        <Text style={{fontSize: 30}}>{this.state.y.toFixed(5)} ini Y</Text>
+        <Text style={{fontSize: 30}}>{this.state.z.toFixed(5)} ini Z</Text> */}
 
-        <Text style={{fontSize: 30}}>{this.state.x} ini X</Text>
-        <Text style={{fontSize: 30}}>{this.state.y} ini Y</Text>
-        <Text style={{fontSize: 30}}>{this.state.z} ini Z</Text>
         <Text style={{fontSize: 30, fontWeight: 'bold'}}>INI ACCELERO</Text>
-        {/* <Text>{this.state.timestamp} ini timestamp</Text> */}
-        <Text style={{fontSize: 30}}>{this.state.xAccelero} ini X</Text>
-        <Text style={{fontSize: 30}}>{this.state.yAccelero} ini Y</Text>
-        <Text style={{fontSize: 30}}>{this.state.zAccelero} ini Z</Text>
-        {/* <Text>{this.state.timestamp} ini timestamp</Text> */}
-          {this.state.yAccelero >= 12 || this.state.zAccelero >= 12 ? 
-            <Text style={{fontSize: 50}}>LONCAT NIH</Text>: null
-          }
+        <Text style={{fontSize: 30}}>{this.state.xAccelero.toFixed(5)} ini X</Text>
+        <Text style={{fontSize: 30}}>{this.state.yAccelero.toFixed(5)} ini Y</Text>
+        <Text style={{fontSize: 30}}>{this.state.zAccelero.toFixed(5)} ini Z</Text>
+
+
+      
+
+
+
       </View>
     );
   }
