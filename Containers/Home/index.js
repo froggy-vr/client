@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { setUpdateIntervalForType, SensorTypes, accelerometer } from 'react-native-sensors'
-import firebase from '../../config'
+import firebase from 'react-native-firebase'
 
 const R = require('ramda')
 
