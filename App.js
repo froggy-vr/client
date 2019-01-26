@@ -7,31 +7,30 @@
  * @lint-ignore-every XPLATJSCOPYRIGHT1
  */
 
-import React, {Component} from 'react';
-import { StyleSheet, Text, View, Dimensions, Button} from 'react-native';
+import React, { Component } from 'react';
+import { StyleSheet, Text, View, Dimensions, Button } from 'react-native';
 import Home from './Containers/Home'
 
-
 export default class App extends Component {
-  
+
   state = {
     height: 0,
-    width: 0
+    width: 0,
   }
- 
+
   render() {
-    let {height, width} = Dimensions.get('window')
+    let { height, width } = Dimensions.get('window')
 
     return (
       <View style={styles.container}>
-        <Text style={{fontSize: 30}}>{this.state.height} ini Height</Text>
-        <Text style={{fontSize: 30}}>{this.state.width} ini Width</Text>
+        <Text style={{ fontSize: 30 }}>{this.state.height} ini Height</Text>
+        <Text style={{ fontSize: 30 }}>{this.state.width} ini Width</Text>
 
-        <Button 
+        <Button
           title="huehue"
-          onPress={() => this.setState({height, width})}
-        /> 
-        <Home />
+          onPress={() => this.setState({ height, width })}
+        />
+        <Home userId={this.state.userId} />
       </View>
     );
   }
