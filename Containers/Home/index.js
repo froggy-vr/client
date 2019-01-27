@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { setUpdateIntervalForType, SensorTypes, accelerometer } from 'react-native-sensors'
 import firebase from 'react-native-firebase'
 
@@ -63,6 +63,7 @@ export default class Home extends Component {
   }
 
   handlePress = () => {
+    console.log('jump', true)
     this.setState({ jump: true })
     firebase.database().ref(`/${this.state.userId}/jump`).set(true)
       .then(() => {
@@ -86,13 +87,13 @@ export default class Home extends Component {
 
   render() {
     return (
-      <View style={styles.container} onPress={this.handlePress} >
+      <TouchableOpacity style={styles.container} onPress={this.handlePress} >
         <Text style={styles.instruction}>Swing the phone up or tap the screen to jump</Text>
         {
           this.state.jump
           && <Text style={{ fontSize: 50 }}>Loncat</Text>
         }
-      </View>
+      </TouchableOpacity>
     );
   }
 }
