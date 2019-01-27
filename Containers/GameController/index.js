@@ -58,10 +58,6 @@ export default class Home extends Component {
     console.log('jump', true)
     this.setState({ jump: true })
     firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/jump`).set(true)
-      .then(() => {
-        this.setState({ jump: false })
-        firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/jump`).set(false)
-      })
   }
 
   resetStack = StackActions.reset({
@@ -97,7 +93,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'black',
-    width: '100%',
     padding: 30
   },
   instruction: {
