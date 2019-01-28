@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, TouchableOpacity, TextInput, View } from 'react-native';
+import { AppRegistry, Linking, TouchableOpacity,StyleSheet, Text, TextInput, View } from 'react-native';
+import QRCodeScanner from 'react-native-qrcode-scanner';
+import firebase from 'react-native-firebase'
+
 
 export default class Home extends Component {
   state = {
@@ -10,9 +13,24 @@ export default class Home extends Component {
     this.props.navigation.navigate('GameController', { gameId: this.state.gameId })
   }
 
+  onSuccess = (e) =>  {
+    this.setState({gameId: e.data}, () => {
+      firebase.database().ref(`/${this.state.gameId}/user`).set(true)
+      this.startGame()
+    })
+  }
+
   render() {
     return (
       <View style={styles.container}>
+        <QRCodeScanner
+          onRead={this.onSuccess.bind(this)}
+          topContent={
+            <Text style={styles.centerText}>
+              Scan The Barcode To Start The Game
+            </Text>
+          }
+        />
         <TextInput
           style={styles.gameInput}
           placeholder="Insert game id"
@@ -52,4 +70,12 @@ const styles = StyleSheet.create({
   startButtonText: {
     color: 'white'
   },
+  centerText: {
+    flex: 1,
+    fontSize: 18,
+    padding: 32,
+    color: '#ffffff',
+  },
 });
+
+AppRegistry.registerComponent('default', () => Home);
