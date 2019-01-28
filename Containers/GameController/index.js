@@ -8,6 +8,7 @@ const R = require('ramda')
 const G = 9.80665
 
 setUpdateIntervalForType(SensorTypes.accelerometer, 25);
+let accelerometerSubscribtion
 
 export default class Home extends Component {
 
@@ -16,11 +17,11 @@ export default class Home extends Component {
   }
 
   _subscribeAccelerometer = () => {
-    
-    let g = { x: 0, y: 0, z: 1 }
-    let samples = []
 
-    accelerometer.subscribe(({ x, y, z, timestamp }) => {
+    let g = { x: 0, y: 0, z: 1 }
+    // let samples = []
+
+    accelerometerSubscribtion = accelerometer.subscribe(({ x, y, z, timestamp }) => {
       if (Math.sqrt(x ** 2 + y ** 2 + z ** 2) <= 10) {
         g = {
           x: Math.sin(Math.atan(x / Math.sqrt(y ** 2 + z ** 2))),
@@ -40,11 +41,13 @@ export default class Home extends Component {
         + Math.sign(g.y * acceleration.y) * (g.y * acceleration.y) ** 2
         + Math.sign(g.z * acceleration.z) * (g.z * acceleration.z) ** 2
 
-      samples = samples.slice(-9).concat(
-        Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum)
-      )
+      // samples = samples.slice(-19).concat(
+      //   Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum)
+      // )
+      // let jump = samples.length >= 10 && R.mean(samples) > 5
 
-      let jump = samples.length >= 10 && R.mean(samples) > 5
+      let jump = Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum) > 30
+      if (jump && !this.state.jump) console.log(Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum))
       if (jump !== this.state.jump) {
         console.log('jump', jump)
         this.setState({ jump })
@@ -54,8 +57,8 @@ export default class Home extends Component {
   }
 
 
-  handlePress = () => {
-    console.log('jump', true)
+  tapText = () => {
+    console.log('screen tap,', 'jump', true)
     this.setState({ jump: true })
     firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/jump`).set(true)
   }
@@ -70,19 +73,22 @@ export default class Home extends Component {
   }
 
   componentWillUnmount() {
+    accelerometerSubscribtion.unsubscribe()
     firebase.database().ref(`/${this.props.navigation.getParam('gameId')}`).remove()
   }
 
   render() {
     return (
-      <TouchableOpacity style={styles.container} onPress={this.handlePress} >
-        <Text style={styles.instruction}>Swing the phone up or tap the screen to jump</Text>
+      <View style={styles.container}>
+        <TouchableOpacity style={styles.textContainer} onPress={this.tapText} >
+          <Text style={styles.instruction}>Swing the phone up or tap this text to jump</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={() => { this.props.navigation.dispatch(this.resetStack) }}>
-            <View style={styles.closeButton}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </View>
-          </TouchableOpacity>
-      </TouchableOpacity>
+          <View style={styles.closeButton}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </View>
+        </TouchableOpacity>
+      </View>
     );
   }
 }
@@ -95,11 +101,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
     padding: 30
   },
+  textContainer: {
+    padding: 30,
+  },
   instruction: {
     color: 'white',
     fontSize: 20,
     textAlign: "center",
-    marginBottom: 30,
   },
   closeButton: {
     justifyContent: "center",
