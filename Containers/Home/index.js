@@ -10,12 +10,18 @@ export default class Home extends Component {
   }
 
   startGame = () => {
-    this.props.navigation.navigate('GameController', { gameId: this.state.gameId })
+    firebase.database().ref(`/${this.state.gameId}/connected`).set(true)
+      .then(() => {
+        this.props.navigation.navigate('GameController', { gameId: this.state.gameId })
+      })
   }
-
-  onSuccess = (e) =>  {
+  
+  handleTextInputChange = gameId => {
+    this.setState({ gameId: gameId || 'user123' }) 
+  }
+  
+  qrOnSuccess = (e) =>  {
     this.setState({gameId: e.data}, () => {
-      firebase.database().ref(`/${this.state.gameId}/user`).set(true)
       this.startGame()
     })
   }
@@ -24,7 +30,7 @@ export default class Home extends Component {
     return (
       <View style={styles.container}>
         <QRCodeScanner
-          onRead={this.onSuccess.bind(this)}
+          onRead={this.qrOnSuccess}
           topContent={
             <Text style={styles.centerText}>
               Scan The Barcode To Start The Game
@@ -34,7 +40,7 @@ export default class Home extends Component {
         <TextInput
           style={styles.gameInput}
           placeholder="Insert game id"
-          onChangeText={gameId => { this.setState({ gameId: gameId || 'user123' }) }}
+          onChangeText={this.handleTextInputChange}
         />
         <TouchableOpacity style={styles.startButton} onPress={this.startGame}>
           <Text style={styles.startButtonText}>Start Game</Text>

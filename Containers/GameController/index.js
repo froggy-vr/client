@@ -68,13 +68,20 @@ export default class Home extends Component {
     actions: [NavigationActions.navigate({ routeName: 'Home' })],
   });
 
+  handleCloseButton = () => {
+    firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/connected`).set(false)
+      .then(() => {
+        this.props.navigation.dispatch(this.resetStack)
+      })
+  }
+
   componentDidMount() {
     this._subscribeAccelerometer()
   }
 
   componentWillUnmount() {
     accelerometerSubscribtion.unsubscribe()
-    firebase.database().ref(`/${this.props.navigation.getParam('gameId')}`).remove()
+    // firebase.database().ref(`/${this.props.navigation.getParam('gameId')}`).remove()
   }
 
   render() {
@@ -83,7 +90,7 @@ export default class Home extends Component {
         <TouchableOpacity style={styles.textContainer} onPress={this.tapText} >
           <Text style={styles.instruction}>Swing the phone up or tap this text to jump</Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => { this.props.navigation.dispatch(this.resetStack) }}>
+        <TouchableOpacity onPress={this.handleCloseButton}>
           <View style={styles.closeButton}>
             <Text style={styles.closeButtonText}>Close</Text>
           </View>
