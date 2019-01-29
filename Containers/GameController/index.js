@@ -46,7 +46,7 @@ export default class Home extends Component {
       // )
       // let jump = samples.length >= 10 && R.mean(samples) > 5
 
-      let jump = Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum) > 30
+      let jump = Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum) > 20
       if (jump && !this.state.jump) console.log(Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum))
       if (jump !== this.state.jump) {
         console.log('jump', jump)
