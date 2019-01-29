@@ -4,7 +4,6 @@ import { setUpdateIntervalForType, SensorTypes, accelerometer } from 'react-nati
 import { StackActions, NavigationActions } from 'react-navigation';
 import firebase from 'react-native-firebase'
 
-const R = require('ramda')
 const G = 9.80665
 
 setUpdateIntervalForType(SensorTypes.accelerometer, 25);
@@ -19,7 +18,6 @@ export default class Home extends Component {
   _subscribeAccelerometer = () => {
 
     let g = { x: 0, y: 0, z: 1 }
-    // let samples = []
 
     accelerometerSubscribtion = accelerometer.subscribe(({ x, y, z, timestamp }) => {
       if (Math.sqrt(x ** 2 + y ** 2 + z ** 2) <= 10) {
@@ -41,24 +39,21 @@ export default class Home extends Component {
         + Math.sign(g.y * acceleration.y) * (g.y * acceleration.y) ** 2
         + Math.sign(g.z * acceleration.z) * (g.z * acceleration.z) ** 2
 
-      // samples = samples.slice(-19).concat(
-      //   Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum)
-      // )
-      // let jump = samples.length >= 10 && R.mean(samples) > 5
+      let upwardAcceleration = Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum)
 
-      let jump = Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum) > 30
-      if (jump && !this.state.jump) console.log(Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum))
-      if (jump !== this.state.jump) {
-        console.log('jump', jump)
-        this.setState({ jump })
-        firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/jump`).set(jump)
+      if (upwardAcceleration > 7 && !this.state.jump) {
+        console.log(upwardAcceleration)
+        this.setState({ jump: true })
+        firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/jump`).set(true)
+      } else if (Math.abs(upwardAcceleration) < 1 && this.state.jump) {
+        this.setState({ jump: false })
+        firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/jump`).set(false)
       }
     })
   }
 
 
   tapText = () => {
-    console.log('screen tap,', 'jump', true)
     this.setState({ jump: true })
     firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/jump`).set(true)
   }
@@ -81,7 +76,6 @@ export default class Home extends Component {
 
   componentWillUnmount() {
     accelerometerSubscribtion.unsubscribe()
-    // firebase.database().ref(`/${this.props.navigation.getParam('gameId')}`).remove()
   }
 
   render() {
