@@ -3,6 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { setUpdateIntervalForType, SensorTypes, accelerometer } from 'react-native-sensors'
 import { StackActions, NavigationActions } from 'react-navigation';
 import firebase from 'react-native-firebase'
+import KeepAwake from 'react-native-keep-awake'
 
 const G = 9.80665
 
@@ -18,6 +19,7 @@ export default class Home extends Component {
   _subscribeAccelerometer = () => {
 
     let g = { x: 0, y: 0, z: 1 }
+    let lastUpwardAcceleration = 0
 
     accelerometerSubscribtion = accelerometer.subscribe(({ x, y, z, timestamp }) => {
       if (Math.sqrt(x ** 2 + y ** 2 + z ** 2) <= 10) {
@@ -40,15 +42,16 @@ export default class Home extends Component {
         + Math.sign(g.z * acceleration.z) * (g.z * acceleration.z) ** 2
 
       let upwardAcceleration = Math.sqrt(Math.abs(quadraticSum)) * Math.sign(quadraticSum)
-
-      if (upwardAcceleration > 7 && !this.state.jump) {
-        console.log(upwardAcceleration)
+      
+      if (upwardAcceleration - lastUpwardAcceleration > 5 && !this.state.jump) {
         this.setState({ jump: true })
         firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/jump`).set(true)
-      } else if (Math.abs(upwardAcceleration) < 1 && this.state.jump) {
+      } else if (Math.abs(upwardAcceleration) < 0.2 && this.state.jump) {
         this.setState({ jump: false })
         firebase.database().ref(`/${this.props.navigation.getParam('gameId')}/jump`).set(false)
       }
+
+      lastUpwardAcceleration = upwardAcceleration
     })
   }
 
@@ -89,6 +92,7 @@ export default class Home extends Component {
             <Text style={styles.closeButtonText}>Close</Text>
           </View>
         </TouchableOpacity>
+        <KeepAwake />
       </View>
     );
   }
